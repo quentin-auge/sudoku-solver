@@ -1,6 +1,4 @@
 from collections import defaultdict
-from copy import deepcopy
-from pprint import pprint
 
 import numpy as np
 
@@ -10,7 +8,8 @@ def eliminate(state_to_constraints, constraint_to_states, selected_state):
         raise
 
     state_to_constraints = dict(state_to_constraints)
-    constraint_to_states = {constraint: set(states) for constraint, states in constraint_to_states.items()}
+    constraint_to_states = {constraint: set(states) for constraint, states in
+                            constraint_to_states.items()}
 
     for constraint in state_to_constraints[selected_state]:
         for state in constraint_to_states[constraint]:
@@ -23,27 +22,21 @@ def eliminate(state_to_constraints, constraint_to_states, selected_state):
     return state_to_constraints, constraint_to_states
 
 
-def solve(state_to_constraints, constraint_to_states, partial_solution=None):
-    partial_solution = partial_solution or set()
-
+def solve(state_to_constraints, constraint_to_states, solution):
     if not state_to_constraints:
-        yield frozenset(partial_solution)
+        yield solution
 
     else:
-        selected_constraint = min(constraint_to_states, key=lambda constraint: len(constraint_to_states[constraint]))
+        selected_constraint = min(constraint_to_states,
+                                  key=lambda constraint: len(constraint_to_states[constraint]))
 
         for selected_state in list(constraint_to_states[selected_constraint]):
-            original_state_to_constraints = state_to_constraints
-            original_constraint_to_states = constraint_to_states
-            state_to_constraints, constraint_to_states = eliminate(state_to_constraints, constraint_to_states,
-                                             selected_state)
+            eliminated_state_to_constraints, eliminated_constraint_to_states = (
+                eliminate(state_to_constraints, constraint_to_states, selected_state)
+            )
 
-            partial_solution.add(selected_state)
-            yield from solve(state_to_constraints, constraint_to_states, partial_solution)
-            partial_solution.remove(selected_state)
-
-            state_to_constraints = original_state_to_constraints
-            constraint_to_states = original_constraint_to_states
+            yield from solve(eliminated_state_to_constraints, eliminated_constraint_to_states,
+                             solution + [selected_state])
 
 
 # n = 2
@@ -55,7 +48,7 @@ def solve(state_to_constraints, constraint_to_states, partial_solution=None):
 #
 # group_grid = [
 #     [1, 2],
-#     [3, 4]
+#     [1, 2]
 # ]
 
 n = 9
@@ -115,16 +108,17 @@ for row in range(1, n + 1):
                 eliminated_states.add((row, col, val))
 
 for eliminated_state in eliminated_states:
-    state_to_constraints, constraint_to_states = eliminate(state_to_constraints, constraint_to_states, eliminated_state)
+    if eliminated_state not in state_to_constraints:
+        row, col, _ = eliminated_state
+        raise ValueError(f'Initial grid violates (row {row}, col {col})')
 
-solutions = []
-for solution in solve(state_to_constraints, constraint_to_states, set()):
-    if solution not in solutions:
-        solutions.append(solution)
+    state_to_constraints, constraint_to_states = eliminate(state_to_constraints,
+                                                           constraint_to_states, eliminated_state)
 
-        solution_grid = grid * 0
-        for row, col, val in set.union(eliminated_states, solution):
-            solution_grid[row - 1, col - 1] = val
-        print(solution_grid)
+for solution in solve(state_to_constraints, constraint_to_states, []):
+    solution_grid = grid * 0
+    for row, col, val in set.union(eliminated_states, solution):
+        solution_grid[row - 1, col - 1] = val
+    print(solution_grid)
 
-        print()
+    print()
