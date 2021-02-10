@@ -5,6 +5,9 @@ import numpy as np
 
 
 def eliminate(state_to_constraints, constraint_to_states, selected_state):
+    if selected_state not in state_to_constraints:
+        return state_to_constraints
+
     state_to_constraints = dict(state_to_constraints)
     adjacent_states = set.union(
         *(constraint_to_states[constraint] for constraint in state_to_constraints[selected_state]))
@@ -35,9 +38,42 @@ def solve(state_to_constraints, partial_solution=None):
 
 n = 2
 
-grid = [[1, 0],
-        [0, 0]]
+grid = [
+    [0, 0],
+    [0, 0]
+]
+
+group_grid = [
+    [1, 2],
+    [3, 4]
+]
+
+# n = 9
+#
+# grid = [
+#     [5, 3, 0, 0, 7, 0, 0, 0, 0],
+#     [6, 0, 0, 1, 9, 5, 0, 0, 0],
+#     [0, 9, 8, 0, 0, 0, 0, 6, 0],
+#     [8, 0, 0, 0, 6, 0, 0, 0, 3],
+#     [4, 0, 0, 8, 0, 3, 0, 0, 1],
+#     [7, 0, 0, 0, 2, 0, 0, 0, 6],
+#     [0, 6, 0, 0, 0, 0, 2, 8, 0],
+#     [0, 0, 0, 4, 1, 9, 0, 0, 5],
+#     [0, 0, 0, 0, 8, 0, 0, 7, 9]]
+#
+# group_grid = [
+#     [1, 1, 1, 2, 2, 2, 3, 3, 3],
+#     [1, 1, 1, 2, 2, 2, 3, 3, 3],
+#     [1, 1, 1, 2, 2, 2, 3, 3, 3],
+#     [4, 4, 4, 5, 5, 5, 6, 6, 6],
+#     [4, 4, 4, 5, 5, 5, 6, 6, 6],
+#     [4, 4, 4, 5, 8, 8, 6, 6, 6],
+#     [7, 7, 7, 8, 8, 8, 9, 9, 9],
+#     [7, 7, 7, 8, 8, 8, 9, 9, 9],
+#     [7, 7, 7, 8, 8, 8, 9, 9, 9]]
+
 grid = np.array(grid)
+group_grid = np.array(group_grid)
 
 state_to_constraints = defaultdict(set)
 constraint_to_states = defaultdict(set)
@@ -59,6 +95,11 @@ for row in range(1, n + 1):
             col_constraint = f'C{col}#{val}'
             state_to_constraints[state].add(col_constraint)
             constraint_to_states[col_constraint].add(state)
+
+            group = group_grid[row - 1, val - 1]
+            group_constraint = f'G{group}#{val}'
+            state_to_constraints[state].add(group_constraint)
+            constraint_to_states[group_constraint].add(state)
 
             if grid[row - 1, col - 1] == val:
                 eliminated_states.add((row, col, val))
