@@ -39,6 +39,22 @@ def solve(state_to_constraints, constraint_to_states, solution):
                              solution + [selected_state])
 
 
+def plot_grid(grid, group_grid):
+    import matplotlib.pyplot as plt
+
+    plt.matshow(group_grid, cmap=plt.cm.get_cmap('Set3'))
+
+    n_rows, n_cols = grid.shape
+    for row in range(n_rows):
+        for col in range(n_cols):
+            val = str(grid[col, row] or '')
+            plt.text(row, col, val, va='center', ha='center')
+            plt.xticks(np.arange(0.5, 9.5), [])
+            plt.yticks(np.arange(0.5, 9.5), [])
+            plt.grid(color='black')
+
+    plt.show()
+
 # n = 2
 #
 # grid = [
@@ -51,32 +67,41 @@ def solve(state_to_constraints, constraint_to_states, solution):
 #     [1, 2]
 # ]
 
+# grid = np.array(grid)
+# group_grid = np.array(group_grid)
+
+
+# n = 9
+#
+# grid = [
+#     [5, 3, 0, 0, 7, 0, 0, 0, 0],
+#     [6, 0, 0, 1, 9, 5, 0, 0, 0],
+#     [0, 9, 8, 0, 0, 0, 0, 6, 0],
+#     [8, 0, 0, 0, 6, 0, 0, 0, 3],
+#     [4, 0, 0, 8, 0, 3, 0, 0, 1],
+#     [7, 0, 0, 0, 2, 0, 0, 0, 6],
+#     [0, 6, 0, 0, 0, 0, 2, 8, 0],
+#     [0, 0, 0, 4, 1, 9, 0, 0, 5],
+#     [0, 0, 0, 0, 8, 0, 0, 7, 9]]
+#
+# group_grid = [
+#     [1, 1, 1, 2, 2, 2, 3, 3, 3],
+#     [1, 1, 1, 2, 2, 2, 3, 3, 3],
+#     [1, 1, 1, 2, 2, 2, 3, 3, 3],
+#     [4, 4, 4, 5, 5, 5, 6, 6, 6],
+#     [4, 4, 4, 5, 5, 5, 6, 6, 6],
+#     [4, 4, 4, 5, 5, 5, 6, 6, 6],
+#     [7, 7, 7, 8, 8, 8, 9, 9, 9],
+#     [7, 7, 7, 8, 8, 8, 9, 9, 9],
+#     [7, 7, 7, 8, 8, 8, 9, 9, 9]]
+#
+# grid = np.array(grid)
+# group_grid = np.array(group_grid)
+
 n = 9
-
-grid = [
-    [5, 3, 0, 0, 7, 0, 0, 0, 0],
-    [6, 0, 0, 1, 9, 5, 0, 0, 0],
-    [0, 9, 8, 0, 0, 0, 0, 6, 0],
-    [8, 0, 0, 0, 6, 0, 0, 0, 3],
-    [4, 0, 0, 8, 0, 3, 0, 0, 1],
-    [7, 0, 0, 0, 2, 0, 0, 0, 6],
-    [0, 6, 0, 0, 0, 0, 2, 8, 0],
-    [0, 0, 0, 4, 1, 9, 0, 0, 5],
-    [0, 0, 0, 0, 8, 0, 0, 7, 9]]
-
-group_grid = [
-    [1, 1, 1, 2, 2, 2, 3, 3, 3],
-    [1, 1, 1, 2, 2, 2, 3, 3, 3],
-    [1, 1, 1, 2, 2, 2, 3, 3, 3],
-    [4, 4, 4, 5, 5, 5, 6, 6, 6],
-    [4, 4, 4, 5, 5, 5, 6, 6, 6],
-    [4, 4, 4, 5, 5, 5, 6, 6, 6],
-    [7, 7, 7, 8, 8, 8, 9, 9, 9],
-    [7, 7, 7, 8, 8, 8, 9, 9, 9],
-    [7, 7, 7, 8, 8, 8, 9, 9, 9]]
-
-grid = np.array(grid)
-group_grid = np.array(group_grid)
+sudoku = np.load('test_2020_04.npz', allow_pickle=True)['sudokus'][0]
+grid = sudoku['grid']
+group_grid = sudoku['group_grid']
 
 state_to_constraints = defaultdict(set)
 constraint_to_states = defaultdict(set)
@@ -115,10 +140,13 @@ for eliminated_state in eliminated_states:
     state_to_constraints, constraint_to_states = eliminate(state_to_constraints,
                                                            constraint_to_states, eliminated_state)
 
+plot_grid(grid, group_grid)
+
+solution_grids = []
 for solution in solve(state_to_constraints, constraint_to_states, []):
     solution_grid = grid * 0
     for row, col, val in set.union(eliminated_states, solution):
         solution_grid[row - 1, col - 1] = val
     print(solution_grid)
-
-    print()
+    solution_grids.append(grid)
+    plot_grid(solution_grid, group_grid)
