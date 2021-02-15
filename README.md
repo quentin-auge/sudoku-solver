@@ -1,6 +1,6 @@
 # Sudoku solver
 
-Solve a sudoku grid by [modeling it](https://en.wikipedia.org/wiki/Exact_cover#Sudoku) as an [exact cover problem](https://en.wikipedia.org/wiki/Exact_cover) and solve it using [algorithm X](https://en.wikipedia.org/wiki/Knuth%27s_Algorithm_X).
+Solve a sudoku grid by [modeling it](https://en.wikipedia.org/wiki/Exact_cover#Sudoku) as an [exact cover problem](https://en.wikipedia.org/wiki/Exact_cover) and using [algorithm X](https://en.wikipedia.org/wiki/Knuth%27s_Algorithm_X).
 
 It allows for fast enumeration of all possible solutions.
 
